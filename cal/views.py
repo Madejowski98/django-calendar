@@ -13,9 +13,6 @@ from .utils import Calendar
 from .forms import EventForm
 
 
-# Ensure these settings are in settings.py
-# BASE_URL = 'https://rekrutacja.teamwsuws.pl'
-# API_KEY = 'your_actual_api_key'
 
 def index(request):
     return HttpResponse('hello')
@@ -36,7 +33,8 @@ class CalendarView(generic.ListView):
 
         # Fetch events and add to context
         context['events'] = get_events()  # Fetch events here
-
+        print('==================')
+        print(context['events'])
         return context
 
 

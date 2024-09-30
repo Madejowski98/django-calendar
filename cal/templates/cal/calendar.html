@@ -21,12 +21,13 @@ Calendar
         {% for event in events %}
         <li>
             <strong>{{ event.name }}</strong><br>
-            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>  <!-- Ensure this line is correct -->
+            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>
             {% if event.end_time %}
-            End: {{ event.end_time|date:"Y-m-d H:i" }}<br>  <!-- This will only show if end_time exists -->
+            End: {{ event.end_time|date:"Y-m-d H:i" }}<br>
             {% endif %}
             <small>Description: {{ event.short_description }}</small>
             <br>
+            <img src="https://rekrutacja.teamwsuws.pl{{ event.image_url }}" alt="{{ event.name }}" style="width:100px; height:auto;"> <!-- Display event image -->
         </li>
         {% empty %}
         <li>No events available for this month.</li> <!-- Message if there are no events -->
