@@ -21,9 +21,9 @@ Calendar
         {% for event in events %}
         <li>
             <strong>{{ event.name }}</strong><br>
-            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>
+            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>  <!-- Ensure this line is correct -->
             {% if event.end_time %}
-            End: {{ event.end_time|date:"Y-m-d H:i" }}<br>
+            End: {{ event.end_time|date:"Y-m-d H:i" }}<br>  <!-- This will only show if end_time exists -->
             {% endif %}
             <small>Description: {{ event.short_description }}</small>
             <br>

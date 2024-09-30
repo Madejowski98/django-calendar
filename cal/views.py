@@ -34,8 +34,8 @@ class CalendarView(generic.ListView):
         context['prev_month'] = prev_month(d)
         context['next_month'] = next_month(d)
 
-        # Fetch events from the API and add to context
-        context['events'] = get_events()  # Call to fetch events
+        # Fetch events and add to context
+        context['events'] = get_events()  # Fetch events here
 
         return context
 
@@ -86,14 +86,16 @@ def get_events():
     # Make the GET request to the API
     response = requests.get(url, headers=headers)
 
-    # Check if the response is successful
     if response.status_code == 200:
-        # Directly return the response JSON data since it's already a list of events
         events = response.json()  # This should be the list of events
-        print("Fetched events data:", events)  # Print the fetched events for debugging
+
+        # Convert start_time to datetime objects
+        for event in events:
+            event['start_time'] = datetime.fromisoformat(event['start_time'])  # Parse start_time to datetime
+
+        print("Fetched events data:", events)  # Print for debugging
         return events  # Return the list of events directly
     else:
-        # Print the error for debugging purposes
         print(f"Error: {response.status_code} - {response.text}")
         return []  # Return an empty list if the API call fails
 
