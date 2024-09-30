@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import datetime, timedelta, date
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -8,10 +7,15 @@ from django.utils.safestring import mark_safe
 import calendar
 import requests
 from django.conf import settings
+
 from .models import Event
 from .utils import Calendar
 from .forms import EventForm
 
+
+# Ensure these settings are in settings.py
+# BASE_URL = 'https://rekrutacja.teamwsuws.pl'
+# API_KEY = 'your_actual_api_key'
 
 def index(request):
     return HttpResponse('hello')
@@ -31,7 +35,7 @@ class CalendarView(generic.ListView):
         context['next_month'] = next_month(d)
 
         # Fetch events from the API and add to context
-        context['events'] = get_events()  # Call to fetch events from the API
+        context['events'] = get_events()  # Call to fetch events
 
         return context
 
@@ -72,42 +76,6 @@ def event(request, event_id=None):
     return render(request, 'cal/event.html', {'form': form})
 
 
-def create_month_calendar(year, month):
-    # Create a month calendar as a matrix
-    month_calendar = calendar.monthcalendar(year, month)
-
-    # Convert the calendar into a more usable format
-    calendar_structure = []
-    for week in month_calendar:
-        week_days = []
-        for day in week:
-            if day == 0:  # Day is zero if it's not in the month
-                week_days.append(None)  # Represent empty days with None
-            else:
-                week_days.append(datetime(year, month, day))
-        calendar_structure.append(week_days)
-
-    return calendar_structure
-
-
-def calendar_view(request):
-    now = datetime.now()
-    year = now.year
-    month = now.month
-
-    calendar = create_month_calendar(year, month)  # Your function to create the calendar structure
-
-    # Fetch events for the current month
-    events_by_date = get_events()  # Fetch events organized by date
-
-    return render(request, 'cal/calendar.html', {
-        'events_by_date': events_by_date,
-        'calendar': calendar,
-        'year': year,
-        'month': month,
-    })
-
-
 def get_events():
     # Define the API endpoint
     url = f"{settings.BASE_URL}/events/"
@@ -118,18 +86,23 @@ def get_events():
     # Make the GET request to the API
     response = requests.get(url, headers=headers)
 
+    # Check if the response is successful
     if response.status_code == 200:
-        data = response.json()  # Parse the JSON response
-        events_by_date = defaultdict(list)  # Create a dictionary to store events by date
-
-        for event in data:
-            start_time = datetime.fromisoformat(event['start_time'])
-            event['start_time'] = start_time  # Store as datetime
-            events_by_date[start_time.date()].append(event)  # Group events by their date
-
-        return events_by_date  # Return the dictionary of events organized by date
+        # Directly return the response JSON data since it's already a list of events
+        events = response.json()  # This should be the list of events
+        print("Fetched events data:", events)  # Print the fetched events for debugging
+        return events  # Return the list of events directly
     else:
-        return {}  # Return an empty dictionary if the API call fails
+        # Print the error for debugging purposes
+        print(f"Error: {response.status_code} - {response.text}")
+        return []  # Return an empty list if the API call fails
+
+def calendar_view(request):
+    # Fetch the events from the API
+    events = get_events()  # Call the function to get events
+
+    # Render your calendar template and pass the events
+    return render(request, 'cal/calendar.html', {'events': events})
 
 def check_api_key(request):
     url = f"{settings.BASE_URL}/events/"  # Use the base URL and events endpoint
