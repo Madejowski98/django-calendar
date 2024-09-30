@@ -1,8 +1,6 @@
 {% extends 'cal/base.html' %}
 
-{% block title %}
-Calendar
-{% endblock %}
+{% block title %}Calendar{% endblock %}
 
 {% block content %}
 <div class="clearfix">
@@ -11,28 +9,45 @@ Calendar
     <a class="btn btn-info right" href="{% url 'cal:event_new' %}"> New Event </a>
 </div>
 
-<!-- Your custom calendar rendering -->
-{{ calendar }}
+<h2 class="text-center">{{ year }}-{{ month }}</h2>
 
-<!-- Displaying Events from API -->
-<div class="events-list">
-    <h3>Events:</h3>
-    <ul>
-        {% for event in events %}
-        <li>
-            <strong>{{ event.name }}</strong><br>
-            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>
-            {% if event.end_time %}
-            End: {{ event.end_time|date:"Y-m-d H:i" }}<br>
-            {% endif %}
-            <small>Description: {{ event.short_description }}</small>
-            <br>
-            <img src="{{ event.image_url }}" alt="{{ event.name }}" style="width:100px; height:auto;">
-        </li>
-        {% empty %}
-        <li>No events available for this month.</li>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for week in calendar %}
+            <tr>
+                {% for day in week %}
+                    <td>
+                        {% if day %}
+                            <strong>{{ day.day }}</strong>
+                            {% if day.date in events_by_date %}
+                                <ul>
+                                    {% for event in events_by_date[day.date] %}
+                                        <li>
+                                            <strong>{{ event.name }}</strong><br>
+                                            Start: {{ event.start_time|date:"Y-m-d H:i" }}<br>
+                                            <small>Description: {{ event.short_description }}</small>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% else %}
+                            <td></td>  <!-- Empty day cell -->
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
         {% endfor %}
-    </ul>
-</div>
-
+    </tbody>
+</table>
 {% endblock %}

@@ -10,7 +10,7 @@ pip3 install django or pip install Django
 pip3 install requests or pip install requests 
 
 python3 manage.py migrate or python manage.py migrate
-python3 manage.py runserver or python manage.py rumserver
+python3 manage.py runserver or python manage.py runserver
 ```
 Find the app running at http://localhost:8000/calendar/!
 
