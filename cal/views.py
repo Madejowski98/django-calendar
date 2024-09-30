@@ -1,17 +1,24 @@
 from datetime import datetime, timedelta, date
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views import generic
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 import calendar
-
-from .models import *
+import requests
+from django.conf import settings
+from .models import Event
 from .utils import Calendar
 from .forms import EventForm
 
+
+# Ensure these settings are in settings.py
+# BASE_URL = 'https://rekrutacja.teamwsuws.pl'
+# API_KEY = 'your_actual_api_key'
+
 def index(request):
     return HttpResponse('hello')
+
 
 class CalendarView(generic.ListView):
     model = Event
@@ -25,7 +32,12 @@ class CalendarView(generic.ListView):
         context['calendar'] = mark_safe(html_cal)
         context['prev_month'] = prev_month(d)
         context['next_month'] = next_month(d)
+
+        # Fetch events from the API and add to context
+        context['events'] = get_events()  # Call to fetch events from the API
+
         return context
+
 
 def get_date(req_month):
     if req_month:
@@ -33,11 +45,13 @@ def get_date(req_month):
         return date(year, month, day=1)
     return datetime.today()
 
+
 def prev_month(d):
     first = d.replace(day=1)
     prev_month = first - timedelta(days=1)
     month = 'month=' + str(prev_month.year) + '-' + str(prev_month.month)
     return month
+
 
 def next_month(d):
     days_in_month = calendar.monthrange(d.year, d.month)[1]
@@ -45,6 +59,7 @@ def next_month(d):
     next_month = last + timedelta(days=1)
     month = 'month=' + str(next_month.year) + '-' + str(next_month.month)
     return month
+
 
 def event(request, event_id=None):
     instance = Event()
@@ -58,3 +73,51 @@ def event(request, event_id=None):
         form.save()
         return HttpResponseRedirect(reverse('cal:calendar'))
     return render(request, 'cal/event.html', {'form': form})
+
+
+def calendar_view(request):
+    # Fetch the events from the API
+    events = get_events()  # Call the function to get events
+
+    # Render your calendar template and pass the events
+    return render(request, 'cal/calendar.html', {'events': events})
+
+def get_events():
+    # Define the API endpoint
+    url = f"{settings.BASE_URL}/events/"
+    headers = {
+        'api-key': settings.API_KEY  # Include the API key in the request headers
+    }
+
+    # Make the GET request to the API
+    response = requests.get(url, headers=headers)
+
+    # Check if the response is successful
+    if response.status_code == 200:
+        data = response.json()  # Parse the JSON response
+        print("Fetched events data:", data)  # Print the entire response for debugging
+
+        if 'data' in data:
+            return data['data']  # Return the list of events
+        else:
+            print("No 'data' key found in the API response.")
+            return []
+    else:
+        print(f"Error: {response.status_code} - {response.text}")  # Print the error
+        return []  # Return an empty list if the API call fails
+
+def check_api_key(request):
+    url = f"{settings.BASE_URL}/events/"  # Use the base URL and events endpoint
+    headers = {
+        'api-key': settings.API_KEY  # Use the API key from settings.py
+    }
+
+    response = requests.get(url, headers=headers)  # Make a GET request to the API
+
+    if response.status_code == 200:
+        # API key is valid, return the data
+        return JsonResponse({'status': 'success', 'data': response.json()})
+    else:
+        # API key is invalid or there's another error
+        return JsonResponse({'status': 'error', 'message': 'Invalid API key or request failed'},
+                            status=response.status_code)

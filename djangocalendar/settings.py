@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4y2^moidr-z*rj794*e4_*(i_yu77mr*%9l*b3+p$htz454efh'
+SECRET_KEY = 'e=0vw9k2+46t-%g#w%^aq7sp+3yhi=a3d#&ks_=+@s8v-8cqww'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -113,6 +113,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+API_KEY = 'd5c0473088b42354024dcedd6a681938'
+
+BASE_URL = 'https://rekrutacja.teamwsuws.pl'
 
 
 # Static files (CSS, JavaScript, Images)
