@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.template.defaultfilters import title
 from django.views import generic
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -30,6 +31,7 @@ class CalendarView(generic.ListView):
         context['calendar'] = mark_safe(html_cal)
         context['prev_month'] = prev_month(d)
         context['next_month'] = next_month(d)
+
 
         # Fetch events and add to context
         context['events'] = get_events()  # Fetch events here
